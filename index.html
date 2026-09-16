@@ -8,15 +8,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg: #F3EFE1; --paper: #FBF9F2; --ink: #2B2A22; --muted: #6E6A58; --border: #DAD4BD;
+    --bg: #F1F3F0; --paper: #FFFFFF; --ink: #201F1C; --muted: #6B6F67; --border: #E7E7E1;
     --green: #2F6B29; --green-tint: #DEEBD3; --clay: #2B2B28; --clay-tint: #E6E5DF;
-    --amber-tint: #F3DDB0; --amber-ink: #8A5A12; --red: #9B3A2E; --red-tint: #F0D6CF; --radius: 7px; --brandblack: #101010;
+    --amber-tint: #F3DDB0; --amber-ink: #8A5A12; --red: #9B3A2E; --red-tint: #F0D6CF; --radius: 16px; --brandblack: #101010;
+    --shadow: 0 1px 2px rgba(16,16,15,0.06), 0 6px 18px rgba(16,16,15,0.07);
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
   html,body{margin:0; padding:0; background: var(--bg); color: var(--ink); font-family: 'Source Sans 3', system-ui, sans-serif; font-size:16px;}
   #shell{max-width:460px; margin:0 auto; min-height:100vh; background:var(--bg); position:relative; display:flex; flex-direction:column;}
   h1,h2,h3{font-family:'Barlow Semi Condensed', system-ui, sans-serif; font-weight:700; letter-spacing:0.01em; margin:0;}
-  header.topbar{position:sticky; top:0; z-index:10; background:var(--brandblack); color:#fff; padding:14px 16px; display:flex; align-items:center; gap:10px; min-height:30px; border-bottom:2px solid var(--green);}
+  header.topbar{position:sticky; top:0; z-index:10; background:var(--brandblack); color:#fff; padding:14px 16px; display:flex; align-items:center; gap:10px; min-height:30px; border-bottom:2px solid var(--green); box-shadow:0 2px 14px rgba(0,0,0,0.2);}
   header.topbar button.back{background:none; border:none; color:#fff; padding:4px; margin:-4px 0 -4px -6px; display:flex; align-items:center; cursor:pointer;}
   header.topbar .titles{flex:1; min-width:0;}
   header.topbar h1{font-size:19px; line-height:1.15; color:#fff;}
@@ -26,7 +27,7 @@
   .empty p{margin:0 0 14px; font-size:15px; line-height:1.5;}
   .fab-add{position:fixed; left:50%; transform:translateX(-50%); bottom:18px; width:calc(100% - 32px); max-width:428px; z-index:9;}
   .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; font-family:'Source Sans 3',sans-serif; font-weight:600; font-size:15.5px; border-radius:var(--radius); padding:13px 18px; border:1px solid transparent; cursor:pointer; min-height:48px; width:100%;}
-  .btn-primary{background:var(--green); color:#fff;}
+  .btn-primary{background:var(--green); color:#fff; box-shadow:0 4px 14px rgba(47,107,41,0.32);}
   .btn-primary:active{background:#2f4835;}
   .btn-outline{background:transparent; color:var(--clay); border-color:var(--clay);}
   .btn-outline:active{background:var(--clay-tint);}
@@ -34,10 +35,10 @@
   .btn-danger:active{background:var(--red-tint);}
   .btn-ghost{background:transparent; color:var(--green); border:none; text-decoration:underline; width:auto; padding:8px 2px; min-height:auto;}
   .btn-sm{padding:10px 10px; font-size:13.5px; min-height:auto;}
-  .card{background:var(--paper); border:1px solid var(--border); border-left:4px solid var(--green); border-radius:var(--radius); padding:14px 14px; margin-bottom:10px; cursor:pointer;}
-  .card.clay{border-left-color:var(--clay);}
-  .card.tan{border-left-color:#8A7B4E;}
-  .card:active{background:#F5F1E4;}
+  .card{background:var(--paper); border:none; box-shadow:var(--shadow); border-top:3px solid var(--green); border-radius:var(--radius); padding:15px 15px; margin-bottom:12px; cursor:pointer; transition:transform .1s ease;}
+  .card.clay{border-top-color:var(--clay);}
+  .card.tan{border-top-color:#8A7B4E;}
+  .card:active{background:#FAFAF8; transform:scale(0.99);}
   .card .row1{display:flex; justify-content:space-between; align-items:baseline; gap:10px;}
   .card .name{font-family:'Barlow Semi Condensed',sans-serif; font-weight:600; font-size:17px;}
   .card .meta{font-size:13px; color:var(--muted); margin-top:3px;}
@@ -53,11 +54,11 @@
   .tag-na, .tag-preparto, .tag-protocolo, .tag-repeticao{background:#ECE9DD; color:var(--muted);}
   form .field{margin-bottom:16px;}
   form label{display:block; font-size:13.5px; font-weight:600; color:var(--muted); margin-bottom:6px;}
-  form input[type=text], form input[type=number], form input[type=date], form select, form textarea{width:100%; padding:12px 12px; font-size:16px; border:1px solid var(--border); border-radius:6px; background:var(--paper); color:var(--ink); font-family:'Source Sans 3',sans-serif;}
+  form input[type=text], form input[type=number], form input[type=date], form select, form textarea{width:100%; padding:12px 13px; font-size:16px; border:1px solid var(--border); border-radius:12px; background:var(--paper); color:var(--ink); font-family:'Source Sans 3',sans-serif;}
   form textarea{resize:vertical; min-height:70px;}
-  form input:focus, form select:focus, form textarea:focus{outline:2px solid var(--green); outline-offset:1px;}
+  form input:focus, form select:focus, form textarea:focus{outline:none; border-color:var(--green); box-shadow:0 0 0 3px rgba(47,107,41,0.16);}
   .sex-toggle{display:flex; gap:8px;}
-  .sex-toggle button{flex:1; padding:11px; border-radius:6px; border:1px solid var(--border); background:var(--paper); font-weight:600; font-size:15px; cursor:pointer; color:var(--ink);}
+  .sex-toggle button{flex:1; padding:11px; border-radius:12px; border:1px solid var(--border); background:var(--paper); font-weight:600; font-size:15px; cursor:pointer; color:var(--ink);}
   .sex-toggle button.active{background:var(--green); color:#fff; border-color:var(--green);}
   .field-row{display:flex; gap:10px;}
   .field-row .field{flex:1;}
@@ -65,29 +66,29 @@
   .sync-pill{display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--muted); padding:0 2px 2px;}
   .sync-dot{width:7px; height:7px; border-radius:50%; background:var(--green); flex-shrink:0;}
   .note{font-size:12.5px; color:var(--muted); line-height:1.5; padding:14px 2px 2px; border-top:1px solid var(--border); margin-top:22px;}
-  #toast{position:fixed; left:50%; bottom:90px; transform:translateX(-150%); background:var(--ink); color:#fff; padding:10px 16px; border-radius:6px; font-size:14px; z-index:20; transition:transform .25s ease; max-width:calc(100% - 40px); text-align:center;}
+  #toast{position:fixed; left:50%; bottom:90px; transform:translateX(-150%); background:var(--ink); color:#fff; padding:11px 18px; border-radius:14px; font-size:14px; z-index:20; transition:transform .25s ease; max-width:calc(100% - 40px); text-align:center; box-shadow:0 6px 20px rgba(0,0,0,0.25);}
   #toast.show{transform:translateX(-50%);}
   ::placeholder{color:#A69F8A;}
   .stat-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
-  .stat-card{background:var(--paper); border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px;}
+  .stat-card{background:var(--paper); border:none; box-shadow:var(--shadow); border-radius:var(--radius); padding:14px 14px;}
   .stat-card .n{font-family:'Barlow Semi Condensed',sans-serif; font-size:26px; font-weight:700; line-height:1;}
   .stat-card .l{font-size:12px; color:var(--muted); margin-top:4px;}
   .indicators{display:flex; flex-direction:column; gap:0; margin:6px 0 0;}
   .indicator-row{display:flex; justify-content:space-between; font-size:14px; padding:9px 0; border-bottom:1px solid var(--border);}
   .indicator-row .v{font-weight:600;}
-  .alert-item{display:flex; gap:10px; align-items:flex-start; background:var(--amber-tint); border-radius:6px; padding:10px 12px; margin-bottom:8px; font-size:13.5px; cursor:pointer; line-height:1.4;}
+  .alert-item{display:flex; gap:10px; align-items:flex-start; background:var(--amber-tint); border-radius:12px; padding:11px 13px; margin-bottom:8px; font-size:13.5px; cursor:pointer; line-height:1.4;}
   .alert-item .dot{width:7px;height:7px;border-radius:50%; background:var(--amber-ink); margin-top:5px; flex-shrink:0;}
   .timeline-item{display:flex; gap:10px; padding:9px 0; border-bottom:1px solid var(--border);}
   .timeline-item .date{font-size:11.5px; color:var(--muted); width:42px; flex-shrink:0; line-height:1.3; padding-top:1px;}
   .timeline-item .body b{font-weight:600; font-size:14px;}
   .timeline-item .body .d{font-size:12.5px; color:var(--muted); margin-top:2px;}
   .qa-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
-  .qa-btn{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; background:var(--paper); border:1px solid var(--border); border-radius:8px; padding:14px 4px; font-size:12px; text-align:center; cursor:pointer; min-height:74px; color:var(--ink); font-weight:600;}
-  .qa-btn:active{background:#F5F1E4;}
-  .qa-btn .ic{font-size:20px;}
+  .qa-btn{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; background:var(--paper); border:none; box-shadow:var(--shadow); border-radius:16px; padding:16px 4px 14px; font-size:12px; text-align:center; cursor:pointer; min-height:86px; color:var(--ink); font-weight:600;}
+  .qa-btn:active{background:#FAFAF8; transform:scale(0.98);}
+  .qa-btn .ic{font-size:19px; width:42px; height:42px; border-radius:50%; background:var(--green-tint); color:var(--green); display:flex; align-items:center; justify-content:center;}
   .progress{height:7px; background:#EAE4D0; border-radius:4px; overflow:hidden; margin-top:6px;}
   .progress > div{height:100%; background:var(--green);}
-  details.more{border:1px solid var(--border); border-radius:6px; margin-top:6px; background:var(--paper);}
+  details.more{border:none; box-shadow:var(--shadow); border-radius:14px; margin-top:6px; background:var(--paper);}
   details.more summary{padding:13px 14px; font-weight:600; font-size:14.5px; cursor:pointer; color:var(--green); list-style:none;}
   details.more summary::-webkit-details-marker{display:none;}
   details.more .inner{padding:2px 14px 16px;}
@@ -95,20 +96,20 @@
   details.more .subhead:first-child{margin-top:2px;}
   .badge-situacao{display:inline-block; font-size:11.5px; font-weight:600; padding:2px 8px; border-radius:20px; background:var(--green-tint); color:var(--green);}
   .badge-situacao.inativo{background:#ECE9DD; color:var(--muted);}
-  .resumo-row{display:flex; justify-content:space-between; background:var(--paper); border:1px solid var(--border); border-radius:var(--radius); padding:14px 6px; margin-bottom:14px;}
+  .resumo-row{display:flex; justify-content:space-between; background:var(--paper); border:none; box-shadow:var(--shadow); border-radius:var(--radius); padding:16px 6px; margin-bottom:14px;}
   .resumo-row .c{text-align:center; flex:1; padding:0 4px;}
   .resumo-row .c .v{font-family:'Barlow Semi Condensed',sans-serif; font-weight:700; font-size:15.5px; overflow-wrap:break-word;}
   .resumo-row .c .k{font-size:10px; color:var(--muted); margin-top:3px;}
-  .panel{background:var(--paper); border:1px solid var(--border); border-radius:var(--radius); padding:14px; margin-bottom:14px;}
+  .panel{background:var(--paper); border:none; box-shadow:var(--shadow); border-radius:var(--radius); padding:16px; margin-bottom:14px;}
   .panel .p-row{display:flex; justify-content:space-between; font-size:14px; padding:5px 0;}
   .panel .p-row .v{font-weight:600;}
   .panel h3{font-size:16px; margin-bottom:6px;}
   .btn-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:16px;}
   .weigh-row{display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);}
   .weigh-row .wn{flex:1; font-weight:600; font-size:14.5px;}
-  .weigh-row input{width:92px; padding:9px; border:1px solid var(--border); border-radius:6px; font-size:16px;}
+  .weigh-row input{width:92px; padding:9px; border:1px solid var(--border); border-radius:10px; font-size:16px;}
   .radio-list{display:flex; flex-direction:column; gap:8px;}
-  .radio-list label{display:flex; align-items:center; gap:10px; font-size:15px; font-weight:500; color:var(--ink); background:var(--paper); border:1px solid var(--border); border-radius:6px; padding:11px 12px; cursor:pointer;}
+  .radio-list label{display:flex; align-items:center; gap:10px; font-size:15px; font-weight:500; color:var(--ink); background:var(--paper); border:1px solid var(--border); border-radius:10px; padding:11px 12px; cursor:pointer;}
   .radio-list input{width:auto;}
 </style>
 </head>
@@ -174,6 +175,82 @@ async function saveData(){
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
   catch(e){ console.error(e); showToast('Não foi possível salvar agora — memória do navegador cheia ou bloqueada'); }
 }
+const AUTH_KEY = 'reban-auth-v1';
+let auth = { users: [], sessionUser: null };
+function loadAuth(){
+  try{
+    const raw = localStorage.getItem(AUTH_KEY);
+    if(raw){ auth = JSON.parse(raw); }
+    else { auth = {users:[{username:'admin', password:'admin', nome:'Admin', role:'admin'}], sessionUser:null}; saveAuth(); }
+  }catch(e){ auth = {users:[{username:'admin', password:'admin', nome:'Admin', role:'admin'}], sessionUser:null}; }
+}
+function saveAuth(){ try{ localStorage.setItem(AUTH_KEY, JSON.stringify(auth)); }catch(e){ console.error(e); } }
+function currentUser(){ return auth.users.find(u=>u.username===auth.sessionUser) || null; }
+function logout(){ auth.sessionUser=null; saveAuth(); state={view:'login'}; render(); }
+
+function renderLogin(){
+  return `<div style="background:var(--brandblack); margin:-16px -16px 24px; padding:30px 16px 20px; text-align:center;">
+    <img src="data:image/jpeg;base64,${LOGO_B64}" alt="Reban Gestão Pecuária" style="width:120px; height:120px; object-fit:cover; border-radius:14px; display:block; margin:0 auto;">
+  </div>
+  <form onsubmit="return submitLogin(event)">
+    <div class="field"><label>Usuário</label><input id="lg-user" type="text" required autocapitalize="none" autocorrect="off" placeholder="usuário"></div>
+    <div class="field"><label>Senha</label><input id="lg-pass" type="password" required placeholder="senha"></div>
+    <button type="submit" class="btn btn-primary">Entrar</button>
+    <div id="lg-error" class="meta" style="color:var(--red); margin-top:10px; text-align:center;"></div>
+  </form>`;
+}
+async function submitLogin(ev){
+  ev.preventDefault();
+  const u = document.getElementById('lg-user').value.trim();
+  const p = document.getElementById('lg-pass').value;
+  const found = auth.users.find(x=>x.username.toLowerCase()===u.toLowerCase() && x.password===p);
+  if(!found){ document.getElementById('lg-error').textContent = 'Usuário ou senha incorretos'; return false; }
+  auth.sessionUser = found.username; saveAuth();
+  state = {view:'properties'};
+  await loadData();
+  return false;
+}
+
+function renderUsersList(){
+  let html = auth.users.map(u=>`<div class="card tan" onclick="go('user-form',{editUsername:'${u.username}'})"><div class="row1"><span class="name">${esc(u.nome||u.username)}</span><span class="count">${u.role==='admin'?'Admin':'Membro'}</span></div><div class="meta">Usuário: ${esc(u.username)}</div></div>`).join('');
+  html += `<div class="fab-add"><button class="btn btn-primary" onclick="go('user-form')">+ Novo usuário</button></div><div style="height:60px;"></div>`;
+  return html;
+}
+function renderUserForm(editUsername){
+  const u = editUsername ? auth.users.find(x=>x.username===editUsername) : null;
+  return `<form onsubmit="return submitUser(event)">
+    <div class="field"><label>Nome</label><input id="uf-nome" type="text" value="${u?esc(u.nome||''):''}" placeholder="Nome da pessoa"></div>
+    <div class="field"><label>Usuário (login)</label><input id="uf-user" type="text" required autocapitalize="none" autocorrect="off" value="${u?esc(u.username):''}" placeholder="ex: joao"></div>
+    <div class="field"><label>Senha</label><input id="uf-pass" type="text" required value="${u?esc(u.password):''}" placeholder="senha de acesso"></div>
+    <div class="field"><label>Permissão</label><select id="uf-role"><option value="membro" ${u&&u.role==='membro'?'selected':''}>Membro</option><option value="admin" ${u&&u.role==='admin'?'selected':''}>Admin</option></select></div>
+    <div class="stack"><button class="btn btn-primary" type="submit">${u?'Salvar alterações':'Criar usuário'}</button>${u&&u.username!=='admin'?`<button type="button" class="btn btn-danger" onclick="deleteUser('${u.username}')">Excluir usuário</button>`:''}</div>
+  </form>`;
+}
+async function submitUser(ev){
+  ev.preventDefault();
+  const nome=document.getElementById('uf-nome').value.trim();
+  const username=document.getElementById('uf-user').value.trim();
+  const password=document.getElementById('uf-pass').value;
+  const role=document.getElementById('uf-role').value;
+  const original = state.editUsername ? auth.users.find(x=>x.username===state.editUsername) : null;
+  if(original){
+    if(username.toLowerCase()!==original.username.toLowerCase() && auth.users.find(x=>x.username.toLowerCase()===username.toLowerCase())){ showToast('Já existe um usuário com esse login'); return false; }
+    Object.assign(original, {nome, username, password, role});
+    if(auth.sessionUser===state.editUsername) auth.sessionUser=username;
+  } else {
+    if(auth.users.find(x=>x.username.toLowerCase()===username.toLowerCase())){ showToast('Já existe um usuário com esse login'); return false; }
+    auth.users.push({username, password, nome, role});
+  }
+  saveAuth(); showToast('Usuário salvo'); go('users-list');
+  return false;
+}
+async function deleteUser(username){
+  if(username==='admin'){ showToast('Não é possível excluir o admin principal'); return; }
+  if(!confirm('Excluir este usuário?')) return;
+  auth.users = auth.users.filter(u=>u.username!==username);
+  saveAuth(); showToast('Usuário excluído'); go('users-list');
+}
+
 async function resetDemoData(){
   if(!confirm('Isso apaga tudo (inclusive a fazenda de exemplo) e começa do zero. Confirma?')) return;
   data = {properties: []};
@@ -274,7 +351,10 @@ function render(){
   const l = (p && state.lotId) ? getLot(p.id, state.lotId) : null;
   const a = (p && l && state.animalId) ? getAnimal(p.id, l.id, state.animalId) : null;
 
-  if(state.view==='properties'){ topHtml=`<div class="titles"><h1 style="letter-spacing:1px;">REBAN</h1></div>`; mainHtml=renderProperties(); }
+  if(state.view==='login'){ topHtml=`<div class="titles"><h1 style="letter-spacing:1px;">REBAN</h1></div>`; mainHtml=renderLogin(); }
+  else if(state.view==='users-list'){ topHtml=backBar('Usuários', ()=>go('properties')); mainHtml=renderUsersList(); }
+  else if(state.view==='user-form'){ topHtml=backBar(state.editUsername?'Editar usuário':'Novo usuário', ()=>go('users-list')); mainHtml=renderUserForm(state.editUsername); }
+  else if(state.view==='properties'){ topHtml=`<div class="titles"><h1 style="letter-spacing:1px;">REBAN</h1></div>`; mainHtml=renderProperties(); }
   else if(state.view==='property-form'){ topHtml=backBar(p?'Editar propriedade':'Nova propriedade', ()=>go(p?'dashboard':'properties',{propertyId:p?p.id:null})); mainHtml=renderPropertyForm(p); }
   else if(state.view==='dashboard'){ topHtml=backBar(p.nome, ()=>go('properties'), `${p.dono} · ${p.localizacao} · ${p.tamanhoHa} ha`); mainHtml=renderDashboard(p); }
   else if(state.view==='lot-picker'){ topHtml=backBar('Selecionar lote', ()=>go('dashboard',{propertyId:p.id}), p.nome); mainHtml=renderLotPicker(p); }
@@ -310,16 +390,22 @@ function renderProperties(){
     <img src="data:image/jpeg;base64,${LOGO_B64}" alt="Reban Gestão Pecuária" style="width:128px; height:128px; object-fit:cover; border-radius:10px; display:block; margin:0 auto;">
     <div style="color:#B9B9AE; font-size:11px; letter-spacing:2.5px; margin-top:12px;">TECNOLOGIA · CONTROLE · RESULTADOS</div>
   </div>`;
+  const cu0 = currentUser();
+  const greetBar = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;"><span class="meta">Olá, ${esc(cu0?(cu0.nome||cu0.username):'')}</span><button class="btn btn-ghost" onclick="logout()">Sair</button></div>`;
   if(data.properties.length===0){
-    return brandBanner + `<div class="empty"><p>Você ainda não cadastrou nenhuma propriedade.<br>Comece adicionando a primeira.</p><button class="btn btn-primary" onclick="go('property-form')">Adicionar propriedade</button></div>`;
+    return brandBanner + greetBar + `<div class="empty"><p>Você ainda não cadastrou nenhuma propriedade.<br>Comece adicionando a primeira.</p><button class="btn btn-primary" onclick="go('property-form')">Adicionar propriedade</button></div>`;
   }
-  let html = brandBanner + data.properties.map(p=>{
+  let html = brandBanner;
+  const cu = currentUser();
+  html += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;"><span class="meta">Olá, ${esc(cu?(cu.nome||cu.username):'')}</span><button class="btn btn-ghost" onclick="logout()">Sair</button></div>`;
+  html += data.properties.map(p=>{
     const total = p.lots.reduce((s,l)=>s+l.animais.length,0);
     return `<div class="card" onclick="go('dashboard',{propertyId:'${p.id}'})"><div class="row1"><span class="name">${esc(p.nome)}</span><span class="count">${total} animais</span></div><div class="meta">${esc(p.dono)} · ${esc(p.localizacao)} · ${p.tamanhoHa} ha</div></div>`;
   }).join('');
   html += `<div class="stack" style="margin-top:18px;">
     <button class="btn btn-outline" onclick="exportBackupJson()">Exportar backup completo (.json)</button>
     <button class="btn btn-outline" onclick="triggerImportBackup()">Importar backup (.json)</button>
+    ${cu&&cu.role==='admin'?`<button class="btn btn-outline" onclick="go('users-list')">Gerenciar usuários</button>`:''}
   </div>`;
   html += `<div style="text-align:center; margin:14px 0 90px;"><button class="btn btn-ghost" onclick="resetDemoData()">Apagar dados de exemplo e começar do zero</button></div>`;
   html += `<div class="fab-add"><button class="btn btn-primary" onclick="go('property-form')">+ Adicionar propriedade</button></div>`;
@@ -932,8 +1018,15 @@ function animalRow(l,a){
 const CSV_HEADER = ['Lote','Brinco','Nome','Sexo','Raça','Categoria','Situação','Idade','Peso atual (kg)','Status Reprodutivo','Dieta','Peso Entrada (kg)','GMD (kg/dia)','Dias no Lote','Observações'];
 function exportCsvPropriedade(propId){ const p=getProp(propId); const rows=[CSV_HEADER]; p.lots.forEach(l=>l.animais.forEach(a=>rows.push(animalRow(l,a)))); csvFromRows(rows, `${p.nome.replace(/\s+/g,'_')}_controle.csv`); }
 function exportCsvLote(propId,lotId){ const p=getProp(propId), l=getLot(propId,lotId); const rows=[CSV_HEADER]; l.animais.forEach(a=>rows.push(animalRow(l,a))); csvFromRows(rows, `${l.nome.replace(/\s+/g,'_')}_controle.csv`); }
-
-loadData();
+loadAuth();
+if(auth.sessionUser && auth.users.find(u=>u.username===auth.sessionUser)){
+  state = {view:'properties'};
+  loadData();
+} else {
+  auth.sessionUser = null; saveAuth();
+  state = {view:'login'};
+  render();
+}
 </script>
 </body>
 </html>
