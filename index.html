@@ -121,7 +121,11 @@
 <div id="toast"></div>
 <input type="file" id="import-file-input" accept="application/json,.json" style="display:none;" onchange="handleImportFile(event)">
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
+const SUPABASE_URL = 'https://xkyrwfdjgovkklvxugwp.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_wzkHsUFEaaa11KlPq6A2zg_7tEWwrTA';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // ================= DADOS =================
 let data = { properties: [] };
 let state = { view: 'properties' };
@@ -163,37 +167,40 @@ function addEvento(a, tipo, titulo, detalhe, dataEv){
   a.eventos.unshift({id:uid('ev'), tipo, titulo, detalhe: detalhe||'', data: dataEv||todayStr()});
 }
 
+let session = null;
+let profile = null;
+let viewingAsAdmin = null;
+
 async function loadData(){
   try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw){ data = JSON.parse(raw); }
-    else { seed(); saveData(); }
-  }catch(e){ seed(); }
+    const { data: row, error } = await sb.from('farm_data').select('data').eq('user_id', session.user.id).single();
+    if(error) throw error;
+    data = row.data;
+  }catch(e){
+    console.error(e);
+    data = {properties: []};
+  }
   render();
 }
 async function saveData(){
-  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
-  catch(e){ console.error(e); showToast('Não foi possível salvar agora — memória do navegador cheia ou bloqueada'); }
-}
-const AUTH_KEY = 'reban-auth-v1';
-let auth = { users: [], sessionUser: null };
-function loadAuth(){
+  if(viewingAsAdmin){ showToast('Modo visualização — somente leitura'); return; }
   try{
-    const raw = localStorage.getItem(AUTH_KEY);
-    if(raw){ auth = JSON.parse(raw); }
-    else { auth = {users:[{username:'admin', password:'admin', nome:'Admin', role:'admin'}], sessionUser:null}; saveAuth(); }
-  }catch(e){ auth = {users:[{username:'admin', password:'admin', nome:'Admin', role:'admin'}], sessionUser:null}; }
+    const { error } = await sb.from('farm_data').upsert({user_id: session.user.id, data: data, updated_at: new Date().toISOString()});
+    if(error) throw error;
+  }catch(e){ console.error(e); showToast('Não foi possível salvar agora — verifique sua internet'); }
 }
-function saveAuth(){ try{ localStorage.setItem(AUTH_KEY, JSON.stringify(auth)); }catch(e){ console.error(e); } }
-function currentUser(){ return auth.users.find(u=>u.username===auth.sessionUser) || null; }
-function logout(){ auth.sessionUser=null; saveAuth(); state={view:'login'}; render(); }
+async function loadProfile(){
+  const { data: p, error } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
+  if(!error) profile = p;
+}
+function logout(){ sb.auth.signOut(); session=null; profile=null; viewingAsAdmin=null; state={view:'login'}; render(); }
 
 function renderLogin(){
   return `<div style="background:var(--brandblack); margin:-16px -16px 24px; padding:30px 16px 20px; text-align:center;">
     <img src="data:image/jpeg;base64,${LOGO_B64}" alt="Reban Gestão Pecuária" style="width:120px; height:120px; object-fit:cover; border-radius:14px; display:block; margin:0 auto;">
   </div>
   <form onsubmit="return submitLogin(event)">
-    <div class="field"><label>Usuário</label><input id="lg-user" type="text" required autocapitalize="none" autocorrect="off" placeholder="usuário"></div>
+    <div class="field"><label>E-mail</label><input id="lg-email" type="email" required autocapitalize="none" autocorrect="off" placeholder="seu@email.com"></div>
     <div class="field"><label>Senha</label><input id="lg-pass" type="password" required placeholder="senha"></div>
     <button type="submit" class="btn btn-primary">Entrar</button>
     <div id="lg-error" class="meta" style="color:var(--red); margin-top:10px; text-align:center;"></div>
@@ -201,55 +208,52 @@ function renderLogin(){
 }
 async function submitLogin(ev){
   ev.preventDefault();
-  const u = document.getElementById('lg-user').value.trim();
-  const p = document.getElementById('lg-pass').value;
-  const found = auth.users.find(x=>x.username.toLowerCase()===u.toLowerCase() && x.password===p);
-  if(!found){ document.getElementById('lg-error').textContent = 'Usuário ou senha incorretos'; return false; }
-  auth.sessionUser = found.username; saveAuth();
+  const email = document.getElementById('lg-email').value.trim();
+  const password = document.getElementById('lg-pass').value;
+  const errEl = document.getElementById('lg-error');
+  errEl.textContent = 'Entrando...';
+  const { data: authData, error } = await sb.auth.signInWithPassword({email, password});
+  if(error){ errEl.textContent = 'Erro: ' + error.message; return false; }
+  session = authData.session;
+  await loadProfile();
   state = {view:'properties'};
   await loadData();
   return false;
 }
 
+let allProfiles = null;
+async function loadAllProfiles(){
+  const { data: rows, error } = await sb.from('profiles').select('*').order('created_at');
+  if(!error) allProfiles = rows;
+  render();
+}
 function renderUsersList(){
-  let html = auth.users.map(u=>`<div class="card tan" onclick="go('user-form',{editUsername:'${u.username}'})"><div class="row1"><span class="name">${esc(u.nome||u.username)}</span><span class="count">${u.role==='admin'?'Admin':'Membro'}</span></div><div class="meta">Usuário: ${esc(u.username)}</div></div>`).join('');
-  html += `<div class="fab-add"><button class="btn btn-primary" onclick="go('user-form')">+ Novo usuário</button></div><div style="height:60px;"></div>`;
+  if(allProfiles===null){ loadAllProfiles(); return `<p class="meta">Carregando usuários...</p>`; }
+  let html = `<div class="note" style="margin:0 0 16px; border-top:none; padding-top:0;">Novos usuários são criados pelo painel do Supabase (Authentication → Add user). Aqui você gerencia permissões e pode ver os dados de cada um.</div>`;
+  html += allProfiles.map(u=>{
+    const isMe = u.id===profile.id;
+    return `<div class="card tan"><div class="row1"><span class="name">${esc(u.nome||u.id)}</span><span class="count">${u.role==='admin'?'Admin':'Membro'}</span></div>
+    ${isMe?'<div class="meta">Você</div>':`<div class="stack" style="margin-top:10px;">
+      <button class="btn btn-outline btn-sm" onclick="viewUserData('${u.id}','${esc(u.nome||u.id)}')">Ver dados</button>
+      <button class="btn btn-outline btn-sm" onclick="toggleRole('${u.id}','${u.role==='admin'?'membro':'admin'}')">${u.role==='admin'?'Tornar membro':'Tornar admin'}</button>
+    </div>`}
+    </div>`;
+  }).join('');
   return html;
 }
-function renderUserForm(editUsername){
-  const u = editUsername ? auth.users.find(x=>x.username===editUsername) : null;
-  return `<form onsubmit="return submitUser(event)">
-    <div class="field"><label>Nome</label><input id="uf-nome" type="text" value="${u?esc(u.nome||''):''}" placeholder="Nome da pessoa"></div>
-    <div class="field"><label>Usuário (login)</label><input id="uf-user" type="text" required autocapitalize="none" autocorrect="off" value="${u?esc(u.username):''}" placeholder="ex: joao"></div>
-    <div class="field"><label>Senha</label><input id="uf-pass" type="text" required value="${u?esc(u.password):''}" placeholder="senha de acesso"></div>
-    <div class="field"><label>Permissão</label><select id="uf-role"><option value="membro" ${u&&u.role==='membro'?'selected':''}>Membro</option><option value="admin" ${u&&u.role==='admin'?'selected':''}>Admin</option></select></div>
-    <div class="stack"><button class="btn btn-primary" type="submit">${u?'Salvar alterações':'Criar usuário'}</button>${u&&u.username!=='admin'?`<button type="button" class="btn btn-danger" onclick="deleteUser('${u.username}')">Excluir usuário</button>`:''}</div>
-  </form>`;
+async function toggleRole(userId, newRole){
+  const { error } = await sb.from('profiles').update({role:newRole}).eq('id', userId);
+  if(error){ showToast('Não foi possível atualizar'); return; }
+  allProfiles = null; showToast('Permissão atualizada'); go('users-list');
 }
-async function submitUser(ev){
-  ev.preventDefault();
-  const nome=document.getElementById('uf-nome').value.trim();
-  const username=document.getElementById('uf-user').value.trim();
-  const password=document.getElementById('uf-pass').value;
-  const role=document.getElementById('uf-role').value;
-  const original = state.editUsername ? auth.users.find(x=>x.username===state.editUsername) : null;
-  if(original){
-    if(username.toLowerCase()!==original.username.toLowerCase() && auth.users.find(x=>x.username.toLowerCase()===username.toLowerCase())){ showToast('Já existe um usuário com esse login'); return false; }
-    Object.assign(original, {nome, username, password, role});
-    if(auth.sessionUser===state.editUsername) auth.sessionUser=username;
-  } else {
-    if(auth.users.find(x=>x.username.toLowerCase()===username.toLowerCase())){ showToast('Já existe um usuário com esse login'); return false; }
-    auth.users.push({username, password, nome, role});
-  }
-  saveAuth(); showToast('Usuário salvo'); go('users-list');
-  return false;
+async function viewUserData(userId, nome){
+  const { data: row, error } = await sb.from('farm_data').select('data').eq('user_id', userId).single();
+  if(error){ showToast('Não foi possível carregar os dados desse usuário'); return; }
+  data = row.data;
+  viewingAsAdmin = {userId, nome};
+  go('properties');
 }
-async function deleteUser(username){
-  if(username==='admin'){ showToast('Não é possível excluir o admin principal'); return; }
-  if(!confirm('Excluir este usuário?')) return;
-  auth.users = auth.users.filter(u=>u.username!==username);
-  saveAuth(); showToast('Usuário excluído'); go('users-list');
-}
+async function exitAdminView(){ viewingAsAdmin=null; state={view:'properties'}; await loadData(); }
 
 async function resetDemoData(){
   if(!confirm('Isso apaga tudo (inclusive a fazenda de exemplo) e começa do zero. Confirma?')) return;
@@ -287,6 +291,7 @@ async function handleImportFile(ev){
 }
 
 function seed(){
+  if(!profile || (profile.role!=='admin')){ data = {properties: []}; return; }
   const dietaPasto = newDieta({nome:'Pasto + sal mineral', categoria:'vacas', ingredientes:'Pastagem + sal mineral', custoKg:0, custoAnimalDia:2.5});
   const dietaConf = newDieta({nome:'Confinamento — silagem de milho', categoria:'engorda', ingredientes:'Silagem de milho + concentrado 18%', custoKg:1.2, custoAnimalDia:9.8});
   const dietaRecria = newDieta({nome:'Pasto + suplemento', categoria:'recria', ingredientes:'Pastagem + suplemento proteico', custoKg:0.9, custoAnimalDia:4.2});
@@ -353,7 +358,6 @@ function render(){
 
   if(state.view==='login'){ topHtml=`<div class="titles"><h1 style="letter-spacing:1px;">REBAN</h1></div>`; mainHtml=renderLogin(); }
   else if(state.view==='users-list'){ topHtml=backBar('Usuários', ()=>go('properties')); mainHtml=renderUsersList(); }
-  else if(state.view==='user-form'){ topHtml=backBar(state.editUsername?'Editar usuário':'Novo usuário', ()=>go('users-list')); mainHtml=renderUserForm(state.editUsername); }
   else if(state.view==='properties'){ topHtml=`<div class="titles"><h1 style="letter-spacing:1px;">REBAN</h1></div>`; mainHtml=renderProperties(); }
   else if(state.view==='property-form'){ topHtml=backBar(p?'Editar propriedade':'Nova propriedade', ()=>go(p?'dashboard':'properties',{propertyId:p?p.id:null})); mainHtml=renderPropertyForm(p); }
   else if(state.view==='dashboard'){ topHtml=backBar(p.nome, ()=>go('properties'), `${p.dono} · ${p.localizacao} · ${p.tamanhoHa} ha`); mainHtml=renderDashboard(p); }
@@ -390,14 +394,12 @@ function renderProperties(){
     <img src="data:image/jpeg;base64,${LOGO_B64}" alt="Reban Gestão Pecuária" style="width:128px; height:128px; object-fit:cover; border-radius:10px; display:block; margin:0 auto;">
     <div style="color:#B9B9AE; font-size:11px; letter-spacing:2.5px; margin-top:12px;">TECNOLOGIA · CONTROLE · RESULTADOS</div>
   </div>`;
-  const cu0 = currentUser();
-  const greetBar = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;"><span class="meta">Olá, ${esc(cu0?(cu0.nome||cu0.username):'')}</span><button class="btn btn-ghost" onclick="logout()">Sair</button></div>`;
+  const viewBanner = viewingAsAdmin ? `<div class="alert-item" style="cursor:default;"><span class="dot"></span><span>Visualizando dados de <b>${esc(viewingAsAdmin.nome)}</b> (somente leitura). <button class="btn btn-ghost" style="padding:0;" onclick="exitAdminView()">Voltar aos meus dados</button></span></div>` : '';
+  const greetBar = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;"><span class="meta">Olá, ${esc(profile?(profile.nome||''):'')}</span><button class="btn btn-ghost" onclick="logout()">Sair</button></div>`;
   if(data.properties.length===0){
-    return brandBanner + greetBar + `<div class="empty"><p>Você ainda não cadastrou nenhuma propriedade.<br>Comece adicionando a primeira.</p><button class="btn btn-primary" onclick="go('property-form')">Adicionar propriedade</button></div>`;
+    return brandBanner + greetBar + viewBanner + `<div class="empty"><p>Você ainda não cadastrou nenhuma propriedade.<br>Comece adicionando a primeira.</p><button class="btn btn-primary" onclick="go('property-form')">Adicionar propriedade</button></div>`;
   }
-  let html = brandBanner;
-  const cu = currentUser();
-  html += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;"><span class="meta">Olá, ${esc(cu?(cu.nome||cu.username):'')}</span><button class="btn btn-ghost" onclick="logout()">Sair</button></div>`;
+  let html = brandBanner + greetBar + viewBanner;
   html += data.properties.map(p=>{
     const total = p.lots.reduce((s,l)=>s+l.animais.length,0);
     return `<div class="card" onclick="go('dashboard',{propertyId:'${p.id}'})"><div class="row1"><span class="name">${esc(p.nome)}</span><span class="count">${total} animais</span></div><div class="meta">${esc(p.dono)} · ${esc(p.localizacao)} · ${p.tamanhoHa} ha</div></div>`;
@@ -405,9 +407,9 @@ function renderProperties(){
   html += `<div class="stack" style="margin-top:18px;">
     <button class="btn btn-outline" onclick="exportBackupJson()">Exportar backup completo (.json)</button>
     <button class="btn btn-outline" onclick="triggerImportBackup()">Importar backup (.json)</button>
-    ${cu&&cu.role==='admin'?`<button class="btn btn-outline" onclick="go('users-list')">Gerenciar usuários</button>`:''}
+    ${profile&&profile.role==='admin'?`<button class="btn btn-outline" onclick="go('users-list')">Gerenciar usuários</button>`:''}
   </div>`;
-  html += `<div style="text-align:center; margin:14px 0 90px;"><button class="btn btn-ghost" onclick="resetDemoData()">Apagar dados de exemplo e começar do zero</button></div>`;
+  html += `<div style="text-align:center; margin:14px 0 90px;"><button class="btn btn-ghost" onclick="resetDemoData()">Apagar todos os dados e começar do zero</button></div>`;
   html += `<div class="fab-add"><button class="btn btn-primary" onclick="go('property-form')">+ Adicionar propriedade</button></div>`;
   return html;
 }
@@ -1018,15 +1020,19 @@ function animalRow(l,a){
 const CSV_HEADER = ['Lote','Brinco','Nome','Sexo','Raça','Categoria','Situação','Idade','Peso atual (kg)','Status Reprodutivo','Dieta','Peso Entrada (kg)','GMD (kg/dia)','Dias no Lote','Observações'];
 function exportCsvPropriedade(propId){ const p=getProp(propId); const rows=[CSV_HEADER]; p.lots.forEach(l=>l.animais.forEach(a=>rows.push(animalRow(l,a)))); csvFromRows(rows, `${p.nome.replace(/\s+/g,'_')}_controle.csv`); }
 function exportCsvLote(propId,lotId){ const p=getProp(propId), l=getLot(propId,lotId); const rows=[CSV_HEADER]; l.animais.forEach(a=>rows.push(animalRow(l,a))); csvFromRows(rows, `${l.nome.replace(/\s+/g,'_')}_controle.csv`); }
-loadAuth();
-if(auth.sessionUser && auth.users.find(u=>u.username===auth.sessionUser)){
-  state = {view:'properties'};
-  loadData();
-} else {
-  auth.sessionUser = null; saveAuth();
-  state = {view:'login'};
-  render();
+async function initApp(){
+  const { data: sessData } = await sb.auth.getSession();
+  if(sessData && sessData.session){
+    session = sessData.session;
+    await loadProfile();
+    state = {view:'properties'};
+    await loadData();
+  } else {
+    state = {view:'login'};
+    render();
+  }
 }
+initApp();
 </script>
 </body>
 </html>
