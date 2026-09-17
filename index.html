@@ -367,6 +367,7 @@ function render(){
   else if(state.view==='lot-dieta-form'){ topHtml=backBar('Dieta do lote', ()=>go('lot-detail',{propertyId:p.id,lotId:l.id}), l.nome); mainHtml=renderLotDietaForm(p,l); }
   else if(state.view==='relatorio-lote'){ topHtml=backBar('Relatório', ()=>go('lot-detail',{propertyId:p.id,lotId:l.id}), l.nome); mainHtml=renderRelatorioLote(p,l); }
   else if(state.view==='pesagem-lote'){ topHtml=backBar('Pesagem em lote', ()=>go('lot-detail',{propertyId:p.id,lotId:l.id}), l.nome); mainHtml=renderPesagemLote(p,l); }
+  else if(state.view==='animal-batch-form'){ topHtml=backBar('Cadastro em lote', ()=>go('lot-detail',{propertyId:p.id,lotId:l.id}), l.nome); mainHtml=renderAnimalBatchForm(p,l); }
   else if(state.view==='animal-detail'){ topHtml=backBar(`Nº ${a.brinco}${a.nome?' · '+a.nome:''}`, ()=>go('lot-detail',{propertyId:p.id,lotId:l.id}), l.nome); mainHtml=renderAnimalDetail(p,l,a); }
   else if(state.view==='animal-form'){ topHtml=backBar(a?'Editar animal':'Novo animal', ()=>go(a?'animal-detail':'lot-detail',{propertyId:p.id,lotId:l.id,animalId:a?a.id:null}), l.nome); mainHtml=renderAnimalForm(p,l,a); }
   else if(state.view==='qa-menu'){ topHtml=backBar('Novo manejo', ()=>go('animal-detail',{propertyId:p.id,lotId:l.id,animalId:a.id}), `Nº ${a.brinco}`); mainHtml=renderQaMenu(p,l,a); }
@@ -552,6 +553,51 @@ async function deleteLot(){
   const p=getProp(state.propertyId); p.lots=p.lots.filter(x=>x.id!==l.id); await saveData(); showToast('Lote excluído'); go('dashboard',{propertyId:p.id});
 }
 
+function renderAnimalBatchForm(p,l){
+  return `<p class="meta" style="margin-bottom:16px;">Cadastra vários animais parecidos de uma vez (ex: separar a desmama, comprar um lote fechado). Depois você ajusta cada um individualmente na lista, se precisar.</p>
+  <form onsubmit="return submitAnimalBatch(event)">
+    <div class="field-row">
+      <div class="field"><label>Quantidade de machos</label><input id="ab-machos" type="number" min="0" value="0"></div>
+      <div class="field"><label>Quantidade de fêmeas</label><input id="ab-femeas" type="number" min="0" value="0"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Peso médio (kg)</label><input id="ab-peso" type="number" step="0.1" min="0" required></div>
+      <div class="field"><label>Idade (meses)</label><input id="ab-idade" type="number" min="0" required></div>
+    </div>
+    <div class="field"><label>Numeração inicial dos brincos (opcional)</label><input id="ab-numinicial" type="number" min="0" placeholder="Ex: 300 → gera 300, 301, 302..."></div>
+    <div class="field"><label>Dieta / observação (opcional, aplica a todos)</label><input id="ab-dieta" type="text" placeholder="Ex: Pasto + suplemento"></div>
+    <button type="submit" class="btn btn-primary">Cadastrar animais</button>
+  </form>`;
+}
+async function submitAnimalBatch(ev){
+  ev.preventDefault();
+  const p = getProp(state.propertyId), l = getLot(p.id, state.lotId);
+  const nMachos = parseInt(document.getElementById('ab-machos').value||'0',10);
+  const nFemeas = parseInt(document.getElementById('ab-femeas').value||'0',10);
+  const peso = n(document.getElementById('ab-peso').value);
+  const idade = n(document.getElementById('ab-idade').value);
+  const numInicialRaw = document.getElementById('ab-numinicial').value;
+  let counter = numInicialRaw ? parseInt(numInicialRaw,10) : null;
+  const dieta = document.getElementById('ab-dieta').value.trim();
+  const total = nMachos + nFemeas;
+  if(total<=0){ showToast('Informe pelo menos 1 animal'); return false; }
+  const dataNasc = idade!=null ? daysAgoStr(Math.round(idade*30)) : '';
+  function criarAnimal(sexo){
+    const brinco = counter!=null ? String(counter++) : ('S/N-'+Math.random().toString(36).slice(2,6));
+    const a = newAnimal({brinco, sexo, dataNascimento: dataNasc, dataEntrada: todayStr(), pesoAtual: peso, situacao:'Ativo', dietaOverride: dieta});
+    a.manejo.pesoEntrada = peso; a.manejo.dataEntradaLote = todayStr();
+    if(l.tipo==='vacas' && sexo==='F') a.reproducao.status='Vazia';
+    addEvento(a,'cadastro','Animal cadastrado (lote)');
+    return a;
+  }
+  for(let i=0;i<nMachos;i++) l.animais.push(criarAnimal('M'));
+  for(let i=0;i<nFemeas;i++) l.animais.push(criarAnimal('F'));
+  await saveData();
+  showToast(`${total} animais adicionados`);
+  go('lot-detail',{propertyId:p.id, lotId:l.id});
+  return false;
+}
+
 function renderLotDetail(p,l){
   const pesos = l.animais.map(a=>a.pesoAtual).filter(v=>v!=null);
   const pesoMedio = pesos.length ? +(pesos.reduce((s,v)=>s+v,0)/pesos.length).toFixed(0) : 0;
@@ -580,7 +626,9 @@ function renderLotDetail(p,l){
 
   let listHtml;
   if(l.animais.length===0){
-    listHtml = `<div class="empty"><p>Nenhum animal neste lote ainda.</p><button class="btn btn-primary" onclick="go('animal-form',{propertyId:'${p.id}',lotId:'${l.id}'})">Adicionar animal</button></div>`;
+    listHtml = `<div class="empty"><p>Nenhum animal neste lote ainda.</p>
+      <div class="stack"><button class="btn btn-primary" onclick="go('animal-form',{propertyId:'${p.id}',lotId:'${l.id}'})">Adicionar 1 animal</button>
+      <button class="btn btn-outline" onclick="go('animal-batch-form',{propertyId:'${p.id}',lotId:'${l.id}'})">Cadastro em lote</button></div></div>`;
   } else {
     listHtml = l.animais.map(a=>{
       const tag = l.tipo==='vacas' ? `<span class="tag ${reproTagClass(a.reproducao.status)}">${esc(a.reproducao.status)}</span>` : `<span class="badge-situacao ${a.situacao!=='Ativo'?'inativo':''}">${esc(a.situacao)}</span>`;
@@ -590,7 +638,12 @@ function renderLotDetail(p,l){
     }).join('');
   }
 
-  return `${panel}${btns}<div class="section-title">Animais</div>${listHtml}<div class="fab-add"><button class="btn btn-primary" onclick="go('animal-form',{propertyId:'${p.id}',lotId:'${l.id}'})">+ Adicionar animal</button></div><div style="height:60px;"></div>`;
+  return `${panel}${btns}<div class="section-title">Animais</div>${listHtml}
+  <div class="btn-grid" style="margin-top:16px;">
+    <button class="btn btn-outline btn-sm" onclick="go('animal-form',{propertyId:'${p.id}',lotId:'${l.id}'})">+ 1 animal</button>
+    <button class="btn btn-outline btn-sm" onclick="go('animal-batch-form',{propertyId:'${p.id}',lotId:'${l.id}'})">+ Cadastro em lote</button>
+  </div>
+  <div style="height:70px;"></div>`;
 }
 
 function renderLotDietaForm(p,l){
