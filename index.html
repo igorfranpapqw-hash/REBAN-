@@ -66,8 +66,8 @@
   .sync-pill{display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--muted); padding:0 2px 2px;}
   .sync-dot{width:7px; height:7px; border-radius:50%; background:var(--green); flex-shrink:0;}
   .note{font-size:12.5px; color:var(--muted); line-height:1.5; padding:14px 2px 2px; border-top:1px solid var(--border); margin-top:22px;}
-  #toast{position:fixed; left:50%; bottom:90px; transform:translateX(-150%); background:var(--ink); color:#fff; padding:11px 18px; border-radius:14px; font-size:14px; z-index:20; transition:transform .25s ease; max-width:calc(100% - 40px); text-align:center; box-shadow:0 6px 20px rgba(0,0,0,0.25);}
-  #toast.show{transform:translateX(-50%);}
+  #toast{position:fixed; left:50%; bottom:90px; transform:translateX(-150%); opacity:0; visibility:hidden; pointer-events:none; background:var(--ink); color:#fff; padding:11px 18px; border-radius:14px; font-size:14px; z-index:20; transition:transform .25s ease,opacity .2s ease; max-width:calc(100% - 40px); text-align:center; box-shadow:0 6px 20px rgba(0,0,0,0.25);}
+  #toast.show{transform:translateX(-50%);opacity:1;visibility:visible;}
   ::placeholder{color:#A69F8A;}
   .stat-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
   .tab-bar{display:flex; gap:4px; background:var(--paper); border-radius:14px; padding:4px; box-shadow:var(--shadow); margin-bottom:16px;}
@@ -119,6 +119,15 @@
   .radio-list{display:flex; flex-direction:column; gap:8px;}
   .radio-list label{display:flex; align-items:center; gap:10px; font-size:15px; font-weight:500; color:var(--ink); background:var(--paper); border:1px solid var(--border); border-radius:10px; padding:11px 12px; cursor:pointer;}
   .radio-list input{width:auto;}
+  /* REBAN 2026 — interface de campo, com alto contraste e alvos de toque amplos */
+  :root{--bg:#f4f7fb;--paper:#fff;--ink:#10233f;--muted:#66758a;--border:#dce5f0;--green:#4d9b3d;--green-tint:#e8f5e4;--clay:#123a70;--clay-tint:#e8f0fa;--amber-tint:#fff3d8;--amber-ink:#9b6713;--red:#c74646;--red-tint:#fde8e8;--brandblack:#09264d;--blue:#1769d2;--blue-light:#eaf3ff;--radius:18px;--shadow:0 8px 24px rgba(22,62,108,.09)}
+  html,body{background:var(--bg);color:var(--ink)} #shell{background:var(--bg);max-width:520px}
+  header.topbar{background:linear-gradient(115deg,#06234a,#1256a6);border-bottom:0;padding:15px 18px;min-height:64px}
+  header.topbar .sub{color:#c9dcf5}.btn{border-radius:14px;font-weight:700}.btn-primary{background:linear-gradient(135deg,#1264ca,#0d4f9d);box-shadow:0 8px 18px rgba(18,100,202,.24)}.btn-outline{color:#155aac;border-color:#b8d0ec;background:#fff}.btn-ghost{color:#1264ca}
+  .card{border:1px solid #e0e9f4;border-top:0;padding:16px;background:#fff}.card.clay,.card.tan{border-top:0}.card:before{content:'';display:inline-block;width:4px;height:34px;border-radius:5px;background:linear-gradient(#1f78dd,#66b6ff);float:left;margin-right:11px}.card.clay:before{background:linear-gradient(#124b91,#1f78dd)}.card.tan:before{background:linear-gradient(#69a935,#9ccc56)}
+  .stat-card,.panel,.chart-card{border:1px solid #e0e9f4;box-shadow:var(--shadow)}.stat-card{position:relative;overflow:hidden}.stat-card:after{content:'';position:absolute;right:-15px;bottom:-18px;width:58px;height:58px;border-radius:50%;background:var(--blue-light)}.stat-card .n{color:#0f4e99}.panel h3{color:#124f99}.tab-btn.active{background:#1264ca}.qa-btn{border:1px solid #dce7f3;box-shadow:none;background:#fff;color:#173354}.qa-btn .ic{background:var(--blue-light);color:#1769d2}.qa-btn:active{background:#f1f7ff}
+  form input[type=text],form input[type=number],form input[type=date],form input[type=email],form input[type=password],form select,form textarea{border-color:#ccd9e8;border-radius:12px;background:#fff;color:var(--ink)}form input:focus,form select:focus,form textarea:focus{border-color:#1769d2;box-shadow:0 0 0 3px rgba(23,105,210,.13)}
+  .reban-welcome{margin:-16px -16px 24px;padding:30px 26px 28px;color:#fff;background:radial-gradient(circle at 90% 15%,rgba(103,179,255,.38),transparent 33%),linear-gradient(145deg,#08264d,#1769d2);border-radius:0 0 30px 30px}.reban-welcome .mark{width:82px;height:82px;object-fit:contain;object-position:center;background:transparent;border-radius:0;padding:0;margin-bottom:20px}.reban-welcome h2{font-size:34px;letter-spacing:.06em}.reban-welcome p{color:#d9eaff;font-size:17px;line-height:1.35;margin:8px 0 0}.reban-welcome small{display:block;color:#9fc8f7;letter-spacing:.12em;margin-top:24px;font-weight:700}.quick-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:10px 0 20px}.quick-btn{min-height:86px;text-align:left;padding:14px;border:1px solid #dce7f3;background:#fff;border-radius:16px;color:#15345d;font:700 14px 'Source Sans 3',sans-serif}.quick-btn span{display:block;width:30px;height:30px;border-radius:10px;background:var(--blue-light);color:#1769d2;text-align:center;padding-top:5px;font-size:16px;margin-bottom:8px}.lot-summary{background:linear-gradient(130deg,#0b3f7d,#1769d2);color:#fff;border-radius:18px;padding:18px;margin-bottom:14px}.lot-summary .meta{color:#d8eaff}.lot-summary .n{font:700 31px 'Barlow Semi Condensed',sans-serif}.section-kicker{font-size:11px;letter-spacing:.1em;color:#5a86bb;font-weight:700;text-transform:uppercase;margin:2px 0 8px}
 </style>
 </head>
 <body>
@@ -172,6 +181,22 @@ function newAnimal(overrides){
   }, overrides);
 }
 
+/* Mantém backups e registros antigos utilizáveis quando novos campos são adicionados. */
+function migrateData(){
+  if(!data || !Array.isArray(data.properties)){ data={properties:[]}; return; }
+  data.properties.forEach(p=>{
+    p.dietas=Array.isArray(p.dietas)?p.dietas:[]; p.lots=Array.isArray(p.lots)?p.lots:[];
+    p.lots.forEach(l=>{
+      l.animais=Array.isArray(l.animais)?l.animais:[];
+      ['categoria','sexo','raca','quantidade','dataEntrada','pesoMedioEntrada','pesoTotalEntrada','idadeMedia','origem','propriedade','piquete','objetivo'].forEach(k=>{ if(l[k]===undefined) l[k]=k==='quantidade'?null:''; });
+      l.animais.forEach(a=>{ if(a.dietaIndividualId===undefined) a.dietaIndividualId=null; if(a.dietaOverride===undefined) a.dietaOverride=''; });
+    });
+  });
+}
+function lotPesoMedioEntrada(l){ return l.pesoMedioEntrada!==null && l.pesoMedioEntrada!=='' ? Number(l.pesoMedioEntrada) : null; }
+function lotPesoTotalEntrada(l){ const m=lotPesoMedioEntrada(l), q=Number(l.quantidade)||l.animais.length||0; return m!==null ? +(m*q).toFixed(1) : null; }
+function dietaDoAnimal(p,l,a){ return a.dietaIndividualId ? getDieta(p.id,a.dietaIndividualId) : (l.dietaId ? getDieta(p.id,l.dietaId) : null); }
+
 function addEvento(a, tipo, titulo, detalhe, dataEv){
   a.eventos.unshift({id:uid('ev'), tipo, titulo, detalhe: detalhe||'', data: dataEv||todayStr()});
 }
@@ -189,6 +214,7 @@ async function loadData(){
     console.error(e);
     data = {properties: []};
   }
+  migrateData();
   render();
 }
 async function saveData(){
@@ -205,13 +231,11 @@ async function loadProfile(){
 function logout(){ sb.auth.signOut(); session=null; profile=null; viewingAsAdmin=null; state={view:'login'}; render(); }
 
 function renderLogin(){
-  return `<div style="background:var(--brandblack); margin:-16px -16px 24px; padding:30px 16px 20px; text-align:center;">
-    <img src="data:image/jpeg;base64,${LOGO_B64}" alt="Reban Gestão Pecuária" style="width:120px; height:120px; object-fit:cover; border-radius:14px; display:block; margin:0 auto;">
-  </div>
+  return `<div class="reban-welcome"><img class="mark" src="reban-bull-white.png" alt="Logo bovino REBAN"><h2>REBAN</h2><p>Gestão inteligente<br>do seu rebanho.</p><small>PECUÁRIA • TECNOLOGIA • RESULTADOS</small></div>
   <form onsubmit="return submitLogin(event)">
     <div class="field"><label>E-mail</label><input id="lg-email" type="email" required autocapitalize="none" autocorrect="off" placeholder="seu@email.com"></div>
     <div class="field"><label>Senha</label><input id="lg-pass" type="password" required placeholder="senha"></div>
-    <button type="submit" class="btn btn-primary">Entrar</button>
+    <button type="submit" class="btn btn-primary">Acessar rebanho</button>
     <div id="lg-error" class="meta" style="color:var(--red); margin-top:10px; text-align:center;"></div>
   </form>`;
 }
@@ -402,7 +426,7 @@ function attachHandlers(){
 // ================= PROPRIEDADES =================
 function renderProperties(){
   const brandBanner = `<div style="background:var(--brandblack); margin:-16px -16px 20px; padding:22px 16px 16px; text-align:center;">
-    <img src="data:image/jpeg;base64,${LOGO_B64}" alt="Reban Gestão Pecuária" style="width:128px; height:128px; object-fit:cover; border-radius:10px; display:block; margin:0 auto;">
+    <img src="reban-bull-white.png" alt="Logo bovino REBAN" style="width:128px; height:128px; object-fit:contain; background:transparent; display:block; margin:0 auto;">
     <div style="color:#B9B9AE; font-size:11px; letter-spacing:2.5px; margin-top:12px;">TECNOLOGIA · CONTROLE · RESULTADOS</div>
   </div>`;
   const viewBanner = viewingAsAdmin ? `<div class="alert-item" style="cursor:default;"><span class="dot"></span><span>Visualizando dados de <b>${esc(viewingAsAdmin.nome)}</b> (somente leitura). <button class="btn btn-ghost" style="padding:0;" onclick="exitAdminView()">Voltar aos meus dados</button></span></div>` : '';
@@ -485,6 +509,13 @@ function renderDashboard(p){
   else content = renderDashGeral(p);
 
   const footer = `
+  <div class="section-kicker">Acesso rápido</div>
+  <div class="quick-grid">
+    <button class="quick-btn" onclick="go('lot-picker',{propertyId:'${p.id}'})"><span>♧</span>Rebanho e lotes</button>
+    <button class="quick-btn" onclick="go('pesagem-lote',{propertyId:'${p.id}',lotId:'${p.lots[0]?.id||''}'})" ${p.lots.length?'':'disabled'}><span>⚖</span>Pesagem</button>
+    <button class="quick-btn" onclick="go('dietas-list',{propertyId:'${p.id}'})"><span>◒</span>Dietas</button>
+    <button class="quick-btn" onclick="go('lot-picker',{propertyId:'${p.id}'})"><span>✦</span>Manejo</button>
+  </div>
   <div class="section-title">Lotes</div>
   ${p.lots.map(l=>{
     const cls = l.tipo==='engorda'?'clay':(l.tipo==='vacas'?'':'tan');
@@ -639,24 +670,33 @@ function renderLotPicker(p){
 function renderLotForm(p,l){
   return `<form onsubmit="return submitLot(event)">
     <div class="field"><label>Nome do lote</label><input id="lf-nome" type="text" required value="${l?esc(l.nome):''}" placeholder="Ex: Recria 02"></div>
-    <div class="field"><label>Tipo</label><select id="lf-tipo">${Object.entries(LOT_TIPOS).map(([k,v])=>`<option value="${k}" ${l&&l.tipo===k?'selected':''}>${v}</option>`).join('')}</select></div>
-    <div class="field"><label>Dieta</label><select id="lf-dieta"><option value="">Nenhuma</option>${p.dietas.map(d=>`<option value="${d.id}" ${l&&l.dietaId===d.id?'selected':''}>${esc(d.nome)}</option>`).join('')}</select></div>
+    <div class="field-row"><div class="field"><label>Categoria</label><select id="lf-tipo">${Object.entries(LOT_TIPOS).map(([k,v])=>`<option value="${k}" ${l&&l.tipo===k?'selected':''}>${v}</option>`).join('')}</select></div><div class="field"><label>Sexo</label><select id="lf-sexo"><option value="">Misto / não informado</option>${['Macho','Fêmea','Misto'].map(v=>`<option ${l&&l.sexo===v?'selected':''}>${v}</option>`).join('')}</select></div></div>
+    <div class="field-row"><div class="field"><label>Raça</label><input id="lf-raca" value="${l?esc(l.raca):''}" placeholder="Ex: Nelore"></div><div class="field"><label>Quantidade de entrada</label><input id="lf-qtd" oninput="updateLotWeightTotal()" type="number" min="0" value="${l&&l.quantidade!=null?l.quantidade:''}" placeholder="Ex: 50"></div></div>
+    <div class="field-row"><div class="field"><label>Data de entrada</label><input id="lf-data" type="date" value="${l?l.dataEntrada||'':''}"></div><div class="field"><label>Idade média (meses)</label><input id="lf-idade" type="number" min="0" value="${l?l.idadeMedia||'':''}"></div></div>
+    <div class="field-row"><div class="field"><label>Peso médio de entrada (kg)</label><input id="lf-peso-medio" oninput="updateLotWeightTotal()" type="number" step="0.1" min="0" value="${l&&l.pesoMedioEntrada!=null?l.pesoMedioEntrada:''}"></div><div class="field"><label>Peso total estimado (kg)</label><input id="lf-peso-total" readonly value="${l&&lotPesoTotalEntrada(l)!=null?lotPesoTotalEntrada(l):''}" placeholder="Calculado automaticamente"></div></div>
+    <div class="field-row"><div class="field"><label>Origem</label><input id="lf-origem" value="${l?esc(l.origem):''}" placeholder="Ex: Compra"></div><div class="field"><label>Propriedade</label><input id="lf-propriedade" value="${l?esc(l.propriedade||p.nome):esc(p.nome)}"></div></div>
+    <div class="field-row"><div class="field"><label>Piquete / local</label><input id="lf-piquete" value="${l?esc(l.piquete):''}" placeholder="Ex: Piquete 4"></div><div class="field"><label>Objetivo</label><select id="lf-objetivo"><option value="">Selecione</option>${['Cria','Recria','Engorda','Reprodução','Vacas','Novilhas','Touros','Outro'].map(v=>`<option ${l&&l.objetivo===v?'selected':''}>${v}</option>`).join('')}</select></div></div>
+    <div class="field"><label>Dieta padrão do lote</label><select id="lf-dieta"><option value="">Nenhuma</option>${p.dietas.map(d=>`<option value="${d.id}" ${l&&l.dietaId===d.id?'selected':''}>${esc(d.nome)}</option>`).join('')}</select><button type="button" class="btn btn-ghost" onclick="go('dieta-form',{propertyId:'${p.id}',lotId:'${l?.id||''}'})">+ Cadastrar dieta</button></div>
     <div class="stack"><button type="submit" class="btn btn-primary">${l?'Salvar alterações':'Criar lote'}</button>${l?`<button type="button" class="btn btn-danger" onclick="deleteLot()">Excluir lote</button>`:''}</div>
   </form>`;
 }
+function updateLotWeightTotal(){ const q=Number(document.getElementById('lf-qtd').value)||0, m=parseFloat(document.getElementById('lf-peso-medio').value); document.getElementById('lf-peso-total').value=Number.isFinite(m)?(q*m).toFixed(1):''; }
 async function submitLot(ev){
   ev.preventDefault();
   const nome=document.getElementById('lf-nome').value.trim(), tipo=document.getElementById('lf-tipo').value, dietaId=document.getElementById('lf-dieta').value||null;
+  const quantidade=n(document.getElementById('lf-qtd').value), pesoMedioEntrada=n(document.getElementById('lf-peso-medio').value);
+  const details={categoria:tipo,sexo:document.getElementById('lf-sexo').value,raca:document.getElementById('lf-raca').value.trim(),quantidade,dataEntrada:document.getElementById('lf-data').value||'',pesoMedioEntrada,pesoTotalEntrada:pesoMedioEntrada!=null?+(pesoMedioEntrada*(quantidade||0)).toFixed(1):null,idadeMedia:n(document.getElementById('lf-idade').value),origem:document.getElementById('lf-origem').value.trim(),propriedade:document.getElementById('lf-propriedade').value.trim(),piquete:document.getElementById('lf-piquete').value.trim(),objetivo:document.getElementById('lf-objetivo').value};
   const p=getProp(state.propertyId);
-  if(state.lotId){ const l=getLot(p.id,state.lotId); Object.assign(l,{nome,tipo,dietaId}); await saveData(); showToast('Lote atualizado'); go('lot-detail',{propertyId:p.id,lotId:l.id}); }
-  else{ const l={id:uid('lot'),nome,tipo,dietaId,animais:[]}; p.lots.push(l); await saveData(); showToast('Lote criado'); go('lot-detail',{propertyId:p.id,lotId:l.id}); }
+  if(state.lotId){ const l=getLot(p.id,state.lotId); Object.assign(l,{nome,tipo,dietaId},details); await saveData(); showToast('Lote atualizado'); go('lot-detail',{propertyId:p.id,lotId:l.id}); }
+  else{ const l={id:uid('lot'),nome,tipo,dietaId,animais:[],...details}; p.lots.push(l); await saveData(); showToast('Lote criado'); go('lot-detail',{propertyId:p.id,lotId:l.id}); }
   return false;
 }
 async function deleteLot(){
   const l=getLot(state.propertyId,state.lotId);
-  if(l.animais.length>0){ showToast('Mova os animais antes de excluir o lote'); return; }
-  if(!confirm('Excluir este lote?')) return;
-  const p=getProp(state.propertyId); p.lots=p.lots.filter(x=>x.id!==l.id); await saveData(); showToast('Lote excluído'); go('dashboard',{propertyId:p.id});
+  const p=getProp(state.propertyId);
+  if(!confirm(`ATENÇÃO: excluir o lote ${l.nome}?\n\n${l.animais.length} animal(is), vínculos de dieta e registros internos deste lote serão removidos.`)) return;
+  if(!confirm('Confirma a exclusão definitiva do lote? Esta ação não pode ser desfeita.')) return;
+  p.lots=p.lots.filter(x=>x.id!==l.id); await saveData(); showToast('Lote e vínculos removidos'); go('dashboard',{propertyId:p.id});
 }
 
 function renderAnimalBatchForm(p,l){
@@ -714,20 +754,24 @@ function renderLotDetail(p,l){
   const dieta = l.dietaId ? getDieta(p.id,l.dietaId) : null;
   const custoDia = dieta ? (dieta.custoAnimalDia * l.animais.length).toFixed(2) : null;
   const prenhez = l.tipo==='vacas' ? Math.round(100*l.animais.filter(a=>a.reproducao.status==='Prenha').length/(l.animais.length||1)) : null;
+  const pesoEntrada = lotPesoMedioEntrada(l), pesoTotalEntrada = lotPesoTotalEntrada(l);
 
-  let panel = `<div class="panel"><div class="p-row"><span>Animais</span><span class="v">${l.animais.length}</span></div><div class="p-row"><span>Peso médio</span><span class="v">${pesoMedio} kg</span></div>`;
+  let panel = `<div class="lot-summary"><div class="section-kicker" style="color:#b9dbff">${esc(l.objetivo||LOT_TIPOS[l.tipo])}</div><div class="n">${esc(l.nome)}</div><div class="meta">${l.animais.length} animais cadastrados${l.piquete?' · '+esc(l.piquete):''}</div></div><div class="panel"><div class="p-row"><span>Animais</span><span class="v">${l.animais.length}</span></div><div class="p-row"><span>Peso médio atual</span><span class="v">${pesoMedio} kg</span></div>`;
+  if(pesoEntrada!=null) panel += `<div class="p-row"><span>Peso médio de entrada</span><span class="v">${pesoEntrada} kg</span></div>`;
+  if(pesoTotalEntrada!=null) panel += `<div class="p-row"><span>Peso total de entrada</span><span class="v">${pesoTotalEntrada.toLocaleString('pt-BR')} kg</span></div>`;
   if(l.tipo==='vacas') panel += `<div class="p-row"><span>Prenhez</span><span class="v">${prenhez}%</span></div>`;
   else panel += `<div class="p-row"><span>GMD médio</span><span class="v">${gmdMedio!=null?gmdMedio+' kg/dia':'—'}</span></div>`;
   panel += `<div class="p-row"><span>Dias médio no lote</span><span class="v">${diasMedio}</span></div>`;
-  panel += `<div class="p-row"><span>Dieta</span><span class="v">${dieta?esc(dieta.nome):'—'}</span></div>`;
+  panel += `<div class="p-row"><span>Dieta padrão</span><span class="v">${dieta?esc(dieta.nome):'—'}</span></div>`;
+  if(l.dataEntrada) panel += `<div class="p-row"><span>Entrada</span><span class="v">${fmtDate(l.dataEntrada)}</span></div>`;
   if(custoDia) panel += `<div class="p-row"><span>Custo total/dia</span><span class="v">R$ ${custoDia}</span></div>`;
   panel += `</div>`;
 
   const btns = `<div class="btn-grid">
-    <button class="btn btn-outline btn-sm" onclick="go('pesagem-lote',{propertyId:'${p.id}',lotId:'${l.id}'})">Pesagem em lote</button>
-    <button class="btn btn-outline btn-sm" onclick="go('lot-dieta-form',{propertyId:'${p.id}',lotId:'${l.id}'})">Dieta do lote</button>
-    <button class="btn btn-outline btn-sm" onclick="go('relatorio-lote',{propertyId:'${p.id}',lotId:'${l.id}'})">Relatório</button>
-    <button class="btn btn-outline btn-sm" onclick="go('lot-form',{propertyId:'${p.id}',lotId:'${l.id}'})">Editar lote</button>
+    <button class="btn btn-outline btn-sm" onclick="go('pesagem-lote',{propertyId:'${p.id}',lotId:'${l.id}'})">⚖ Pesagens</button>
+    <button class="btn btn-outline btn-sm" onclick="go('lot-dieta-form',{propertyId:'${p.id}',lotId:'${l.id}'})">◒ Dieta</button>
+    <button class="btn btn-outline btn-sm" onclick="go('relatorio-lote',{propertyId:'${p.id}',lotId:'${l.id}'})">◫ Indicadores</button>
+    <button class="btn btn-outline btn-sm" onclick="go('lot-form',{propertyId:'${p.id}',lotId:'${l.id}'})">✎ Editar</button>
   </div>`;
 
   let listHtml;
@@ -739,7 +783,8 @@ function renderLotDetail(p,l){
     listHtml = l.animais.map(a=>{
       const tag = l.tipo==='vacas' ? `<span class="tag ${reproTagClass(a.reproducao.status)}">${esc(a.reproducao.status)}</span>` : `<span class="badge-situacao ${a.situacao!=='Ativo'?'inativo':''}">${esc(a.situacao)}</span>`;
       const gmd = calcGMD(a);
-      const sub = l.tipo==='vacas' ? `${a.sexo==='F'?'Fêmea':'Macho'} · ${calcIdadeTexto(a.dataNascimento)} · ${a.pesoAtual} kg` : `${calcIdadeTexto(a.dataNascimento)} · ${a.pesoAtual} kg${gmd!=null?' · GMD '+gmd+' kg/dia':''}`;
+      const dietaAnimal=dietaDoAnimal(p,l,a);
+      const sub = (l.tipo==='vacas' ? `${a.sexo==='F'?'Fêmea':'Macho'} · ${calcIdadeTexto(a.dataNascimento)} · ${a.pesoAtual} kg` : `${calcIdadeTexto(a.dataNascimento)} · ${a.pesoAtual} kg${gmd!=null?' · GMD '+gmd+' kg/dia':''}`) + `${dietaAnimal?' · '+esc(dietaAnimal.nome):''}`;
       return `<div class="card ${l.tipo==='engorda'?'clay':(l.tipo==='vacas'?'':'tan')}" onclick="go('animal-detail',{propertyId:'${p.id}',lotId:'${l.id}',animalId:'${a.id}'})"><div class="row1"><span class="name">Nº ${esc(a.brinco)}</span>${tag}</div><div class="meta">${sub}</div></div>`;
     }).join('');
   }
@@ -833,7 +878,14 @@ async function submitDieta(ev){
   if(state.lotId) go('lot-dieta-form',{propertyId:p.id,lotId:state.lotId}); else go('dietas-list',{propertyId:p.id});
   return false;
 }
-async function deleteDieta(){ if(!confirm('Excluir esta dieta?')) return; const p=getProp(state.propertyId); p.dietas=p.dietas.filter(d=>d.id!==state.dietaId); p.lots.forEach(l=>{if(l.dietaId===state.dietaId) l.dietaId=null;}); await saveData(); showToast('Dieta excluída'); go('dietas-list',{propertyId:p.id}); }
+async function deleteDieta(){
+  const p=getProp(state.propertyId), dieta=getDieta(p.id,state.dietaId);
+  const lotes=p.lots.filter(l=>l.dietaId===state.dietaId), animais=p.lots.flatMap(l=>l.animais.filter(a=>a.dietaIndividualId===state.dietaId));
+  const uso=lotes.length+animais.length;
+  if(!confirm(uso?`A dieta “${dieta.nome}” está em uso por ${lotes.length} lote(s) e ${animais.length} animal(is). Eles passarão a ficar sem esta dieta. Deseja continuar?`:`Excluir a dieta “${dieta.nome}”?`)) return;
+  p.dietas=p.dietas.filter(d=>d.id!==state.dietaId); p.lots.forEach(l=>{if(l.dietaId===state.dietaId) l.dietaId=null;l.animais.forEach(a=>{if(a.dietaIndividualId===state.dietaId)a.dietaIndividualId=null;});});
+  await saveData(); showToast('Dieta excluída e vínculos atualizados'); go('dietas-list',{propertyId:p.id});
+}
 
 // ================= ANIMAL =================
 function reproTagClass(s){
@@ -844,6 +896,7 @@ function reproTagClass(s){
 }
 
 function renderAnimalDetail(p,l,a){
+  const dietaPadrao=l.dietaId?getDieta(p.id,l.dietaId):null, dietaIndividual=a.dietaIndividualId?getDieta(p.id,a.dietaIndividualId):null;
   let html = `<div class="resumo-row">
     <div class="c"><div class="v">${esc(a.brinco)}</div><div class="k">ID</div></div>
     <div class="c"><div class="v">${esc(a.categoria||'—')}</div><div class="k">CATEGORIA</div></div>
@@ -851,6 +904,7 @@ function renderAnimalDetail(p,l,a){
     <div class="c"><div class="v">${esc(l.nome)}</div><div class="k">LOTE</div></div>
     <div class="c"><div class="badge-situacao ${a.situacao!=='Ativo'?'inativo':''}">${esc(a.situacao)}</div><div class="k">SITUAÇÃO</div></div>
   </div>`;
+  html += `<div class="panel"><h3>Alimentação</h3><div class="p-row"><span>Dieta padrão do lote</span><span class="v">${dietaPadrao?esc(dietaPadrao.nome):'—'}</span></div><div class="p-row"><span>Dieta individual</span><span class="v">${dietaIndividual?esc(dietaIndividual.nome):(a.dietaOverride?esc(a.dietaOverride):'Usa a padrão')}</span></div></div>`;
 
   if(l.tipo==='vacas'){
     const r=a.reproducao;
@@ -918,6 +972,7 @@ function renderAnimalForm(p,l,a){
     </div>
     <div class="field"><label>Categoria</label><input id="a-cat" type="text" list="cat-list" value="${a?esc(a.categoria):''}" placeholder="Ex: Novilha"><datalist id="cat-list">${CATEGORIAS.map(c=>`<option value="${c}">`).join('')}</datalist></div>
     <div class="field"><label>Lote</label><select id="a-lote">${p.lots.map(lo=>`<option value="${lo.id}" ${l.id===lo.id?'selected':''}>${esc(lo.nome)}</option>`).join('')}</select></div>
+    <div class="field"><label>Dieta individual</label><select id="a-dieta-individual"><option value="">Usar dieta padrão do lote</option>${p.dietas.map(d=>`<option value="${d.id}" ${a&&a.dietaIndividualId===d.id?'selected':''}>${esc(d.nome)}</option>`).join('')}</select><div class="meta">A escolha aqui vale somente para este animal.</div></div>
     <div class="field-row">
       <div class="field"><label>Situação</label><select id="a-sit">${['Ativo','Vendido','Morto','Descartado'].map(s=>`<option ${a&&a.situacao===s?'selected':''}>${s}</option>`).join('')}</select></div>
       <div class="field"><label>Peso atual (kg)</label><input id="a-peso" type="number" step="0.1" min="0" required value="${a?a.pesoAtual:''}"></div>
@@ -972,6 +1027,7 @@ async function submitAnimal(ev){
     categoria: document.getElementById('a-cat').value.trim(), situacao: document.getElementById('a-sit').value, pesoAtual: n(document.getElementById('a-peso').value)||0,
     origem: document.getElementById('a-origem').value.trim(), dataEntrada: document.getElementById('a-dentrada').value||'',
     observacoes: document.getElementById('a-obs').value.trim(),
+    dietaIndividualId: document.getElementById('a-dieta-individual').value||null,
   };
   const manejoVals = {
     pesoEntrada: n(document.getElementById('a-mpentrada').value), dataEntradaLote: document.getElementById('a-mdentrada').value||todayStr(),
@@ -1076,7 +1132,7 @@ function renderQaForm(p,l,a,key){
     const outros = getProp(p.id).lots.filter(lo=>lo.id!==l.id);
     return qaWrap(`<div class="field"><label>Novo lote</label><select id="qf-lote">${outros.map(lo=>`<option value="${lo.id}">${esc(lo.nome)}</option>`).join('')}</select></div>`);
   }
-  if(key==='dieta') return qaWrap(`<div class="field"><label>Dieta atual deste animal</label><input id="qf-dieta" type="text" value="${esc(a.dietaOverride||'')}" placeholder="Ex: Pasto + suplemento extra"></div>`);
+  if(key==='dieta') return qaWrap(`<div class="field"><label>Dieta individual deste animal</label><select id="qf-dieta"><option value="">Usar a dieta padrão do lote</option>${p.dietas.map(d=>`<option value="${d.id}" ${a.dietaIndividualId===d.id?'selected':''}>${esc(d.nome)}</option>`).join('')}</select><div class="meta">Não altera a dieta padrão do lote.</div></div>`);
   if(key==='tratamento') return qaWrap(`<div class="field"><label>Medicamento / procedimento</label><input id="qf-med" type="text" required></div><div class="field"><label>Observação</label><input id="qf-obs" type="text"></div>`);
   if(key==='vacinacao') return qaWrap(`<div class="field"><label>Vacina</label><input id="qf-vacina" type="text" required></div><div class="field"><label>Data</label><input id="qf-data" type="date" value="${today}"></div>`);
   if(key==='vermifugacao') return qaWrap(`<div class="field"><label>Produto</label><input id="qf-produto" type="text" required></div><div class="field"><label>Data</label><input id="qf-data" type="date" value="${today}"></div>`);
@@ -1151,7 +1207,7 @@ async function submitQa(ev){
   }
   else if(key==='cio'){ addEvento(a,'cio','Cio observado','', val('qf-data')); }
   else if(key==='troca_lote'){ const destinoId=val('qf-lote'); const destino=getLot(p.id,destinoId); l.animais=l.animais.filter(x=>x.id!==a.id); a.manejo.dataEntradaLote=today; addEvento(a,'troca_lote',`Troca de lote — ${l.nome} → ${destino.nome}`); destino.animais.push(a); await saveData(); showToast('Animal movido de lote'); go('animal-detail',{propertyId:p.id,lotId:destino.id,animalId:a.id}); return false; }
-  else if(key==='dieta'){ a.dietaOverride=val('qf-dieta'); addEvento(a,'dieta',`Dieta alterada — ${a.dietaOverride}`); }
+  else if(key==='dieta'){ a.dietaIndividualId=val('qf-dieta')||null; a.dietaOverride=''; const dieta=dietaDoAnimal(p,l,a); addEvento(a,'dieta',`Dieta alterada — ${dieta?dieta.nome:'dieta padrão do lote'}`); }
   else if(key==='tratamento'){ addEvento(a,'tratamento',`Tratamento — ${val('qf-med')}`, val('qf-obs')); }
   else if(key==='vacinacao'){ addEvento(a,'vacinacao',`Vacinação — ${val('qf-vacina')}`,'', val('qf-data')); }
   else if(key==='vermifugacao'){ addEvento(a,'vermifugacao',`Vermifugação — ${val('qf-produto')}`,'', val('qf-data')); }
