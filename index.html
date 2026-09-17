@@ -70,6 +70,14 @@
   #toast.show{transform:translateX(-50%);}
   ::placeholder{color:#A69F8A;}
   .stat-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
+  .tab-bar{display:flex; gap:4px; background:var(--paper); border-radius:14px; padding:4px; box-shadow:var(--shadow); margin-bottom:16px;}
+  .tab-btn{flex:1; text-align:center; padding:10px 4px; border-radius:10px; font-weight:600; font-size:13.5px; cursor:pointer; color:var(--muted); background:transparent; border:none; font-family:'Source Sans 3',sans-serif;}
+  .tab-btn.active{background:var(--green); color:#fff;}
+  .chart-card{background:var(--paper); box-shadow:var(--shadow); border-radius:var(--radius); padding:16px; margin-bottom:14px;}
+  .chart-card h3{font-size:15px; margin-bottom:12px;}
+  .chart-card .chart-wrap{position:relative; height:220px;}
+  .fin-summary{display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:14px;}
+  .fin-summary .stat-card .n{font-size:21px;}
   .stat-card{background:var(--paper); border:none; box-shadow:var(--shadow); border-radius:var(--radius); padding:14px 14px;}
   .stat-card .n{font-family:'Barlow Semi Condensed',sans-serif; font-size:26px; font-weight:700; line-height:1;}
   .stat-card .l{font-size:12px; color:var(--muted); margin-top:4px;}
@@ -122,6 +130,7 @@
 <input type="file" id="import-file-input" accept="application/json,.json" style="display:none;" onchange="handleImportFile(event)">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script>
 const SUPABASE_URL = 'https://xkyrwfdjgovkklvxugwp.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_wzkHsUFEaaa11KlPq6A2zg_7tEWwrTA';
@@ -376,6 +385,7 @@ function render(){
   else if(state.view==='dieta-form'){ const dt = state.dietaId ? getDieta(p.id,state.dietaId) : null; topHtml=backBar(dt?'Editar dieta':'Nova dieta', ()=>go('dietas-list',{propertyId:p.id})); mainHtml=renderDietaForm(p,dt); }
 
   top.innerHTML=topHtml; main.innerHTML=mainHtml; attachHandlers();
+  if(state.view==='dashboard' && p) renderDashboardCharts(p);
 }
 
 function attachHandlers(){
@@ -465,6 +475,37 @@ function computeAlerts(p){
 }
 
 function renderDashboard(p){
+  if(!state.dashTab) state.dashTab = 'geral';
+  const tabs = [['geral','Geral'],['gado','Gado'],['financeiro','Financeiro']];
+  const tabBar = `<div class="tab-bar">${tabs.map(([k,l])=>`<button class="tab-btn ${state.dashTab===k?'active':''}" onclick="setDashTab('${k}')">${l}</button>`).join('')}</div>`;
+
+  let content;
+  if(state.dashTab==='gado') content = renderDashGado(p);
+  else if(state.dashTab==='financeiro') content = renderDashFinanceiro(p);
+  else content = renderDashGeral(p);
+
+  const footer = `
+  <div class="section-title">Lotes</div>
+  ${p.lots.map(l=>{
+    const cls = l.tipo==='engorda'?'clay':(l.tipo==='vacas'?'':'tan');
+    return `<div class="card ${cls}" onclick="go('lot-detail',{propertyId:'${p.id}',lotId:'${l.id}'})"><div class="row1"><span class="name">${esc(l.nome)}</span><span class="count">${l.animais.length} animais</span></div><div class="meta">${LOT_TIPOS[l.tipo]}</div></div>`;
+  }).join('')}
+  <button class="btn btn-outline" style="margin-top:6px;" onclick="go('lot-form',{propertyId:'${p.id}'})">+ Novo lote</button>
+
+  <div class="stack">
+    <button class="btn btn-outline" onclick="go('dietas-list',{propertyId:'${p.id}'})">Dietas cadastradas</button>
+    <button class="btn btn-outline" onclick="exportCsvPropriedade('${p.id}')">Exportar planilha completa (.csv)</button>
+    <button class="btn btn-ghost" onclick="go('property-form',{propertyId:'${p.id}'})">Editar dados da propriedade</button>
+  </div>
+
+  <div class="fab-add"><button class="btn btn-primary" onclick="go('lot-picker',{propertyId:'${p.id}'})">+ Manejo</button></div>
+  <div style="height:70px;"></div>
+  <div class="note">Dados salvos na nuvem — funciona em qualquer aparelho logado. Exporte a planilha de vez em quando como backup extra.</div>`;
+
+  return `<div class="sync-pill"><span class="sync-dot"></span> Sincronizado</div>${tabBar}${content}${footer}`;
+}
+
+function renderDashGeral(p){
   const allAnimais = p.lots.flatMap(l=>l.animais.map(a=>({a,l})));
   const ativos = allAnimais.filter(x=>x.a.situacao==='Ativo');
   const vacas = p.lots.filter(l=>l.tipo==='vacas').flatMap(l=>l.animais);
@@ -491,8 +532,7 @@ function renderDashboard(p){
   ];
 
   return `
-  <div class="sync-pill"><span class="sync-dot"></span> Salvo neste dispositivo</div>
-  <div class="section-title">Situação da propriedade</div>
+  <div class="section-title" style="margin-top:0;">Situação da propriedade</div>
   <div class="stat-grid">${cards.map(([l,v])=>`<div class="stat-card"><div class="n">${v}</div><div class="l">${l}</div></div>`).join('')}</div>
 
   <div class="section-title">Indicadores</div>
@@ -506,23 +546,89 @@ function renderDashboard(p){
   </div>
 
   ${alerts.length? `<div class="section-title">Alertas</div>${alerts.slice(0,6).map(al=>`<div class="alert-item" onclick="go('animal-detail',{propertyId:'${al.propertyId}',lotId:'${al.lotId}',animalId:'${al.animalId}'})"><span class="dot"></span><span>${esc(al.texto)}</span></div>`).join('')}${alerts.length>6?`<div class="meta" style="margin-bottom:10px;">+ ${alerts.length-6} outros alertas</div>`:''}` : ''}
+  `;
+}
 
-  <div class="section-title">Lotes</div>
-  ${p.lots.map(l=>{
-    const cls = l.tipo==='engorda'?'clay':(l.tipo==='vacas'?'':'tan');
-    return `<div class="card ${cls}" onclick="go('lot-detail',{propertyId:'${p.id}',lotId:'${l.id}'})"><div class="row1"><span class="name">${esc(l.nome)}</span><span class="count">${l.animais.length} animais</span></div><div class="meta">${LOT_TIPOS[l.tipo]}</div></div>`;
-  }).join('')}
-  <button class="btn btn-outline" style="margin-top:6px;" onclick="go('lot-form',{propertyId:'${p.id}'})">+ Novo lote</button>
+function renderDashGado(p){
+  return `
+  <div class="chart-card"><h3>Composição do rebanho</h3><div class="chart-wrap"><canvas id="chart-composicao"></canvas></div></div>
+  <div class="chart-card"><h3>Situação reprodutiva das vacas</h3><div class="chart-wrap"><canvas id="chart-repro"></canvas></div></div>
+  <div class="chart-card"><h3>Peso médio por lote (kg)</h3><div class="chart-wrap"><canvas id="chart-peso-lote"></canvas></div></div>
+  `;
+}
 
-  <div class="stack">
-    <button class="btn btn-outline" onclick="go('dietas-list',{propertyId:'${p.id}'})">Dietas cadastradas</button>
-    <button class="btn btn-outline" onclick="exportCsvPropriedade('${p.id}')">Exportar planilha completa (.csv)</button>
-    <button class="btn btn-ghost" onclick="go('property-form',{propertyId:'${p.id}'})">Editar dados da propriedade</button>
+function renderDashFinanceiro(p){
+  const engordaAnimais = p.lots.filter(l=>l.tipo==='engorda').flatMap(l=>l.animais);
+  const comFinanceiro = engordaAnimais.filter(a=>a.manejo.precoVenda || a.manejo.precoCompra);
+  if(comFinanceiro.length===0){
+    return `<div class="empty"><p>Nenhum dado financeiro lançado ainda.<br>Preencha preço de compra, venda e custos nos animais de engorda (em "Editar cadastro → Mais informações → Financeiro") pra ver os gráficos aqui.</p></div>`;
+  }
+  const fins = comFinanceiro.map(calcFinanceiro);
+  const sum = arr => arr.reduce((s,v)=>s+(v||0),0);
+  const custoTotal = sum(fins.map(f=>f.custoTotal));
+  const receitaTotal = sum(fins.map(f=>f.receita));
+  const lucroTotal = receitaTotal - custoTotal;
+  const margemMedia = receitaTotal>0 ? +((lucroTotal/receitaTotal)*100).toFixed(1) : null;
+  return `
+  <div class="fin-summary">
+    <div class="stat-card"><div class="n">R$ ${lucroTotal.toFixed(0)}</div><div class="l">Lucro total</div></div>
+    <div class="stat-card"><div class="n">${margemMedia!=null?margemMedia+'%':'—'}</div><div class="l">Margem média</div></div>
   </div>
+  <div class="chart-card"><h3>Custo × Receita × Lucro (total)</h3><div class="chart-wrap"><canvas id="chart-fin-resumo"></canvas></div></div>
+  <div class="chart-card"><h3>Lucro por lote de engorda</h3><div class="chart-wrap"><canvas id="chart-fin-lote"></canvas></div></div>
+  `;
+}
 
-  <div class="fab-add"><button class="btn btn-primary" onclick="go('lot-picker',{propertyId:'${p.id}'})">+ Manejo</button></div>
-  <div style="height:70px;"></div>
-  <div class="note">Dados salvos direto neste navegador/celular — funciona sem internet. Se limpar os dados do navegador (ou trocar de aparelho), os dados são perdidos: exporte a planilha de vez em quando como backup.</div>`;
+function setDashTab(tab){ state.dashTab = tab; render(); }
+
+let chartInstances = {};
+function destroyChart(id){ if(chartInstances[id]){ chartInstances[id].destroy(); delete chartInstances[id]; } }
+function makeChart(id, config){
+  destroyChart(id);
+  const ctx = document.getElementById(id);
+  if(!ctx || typeof Chart==='undefined') return;
+  chartInstances[id] = new Chart(ctx, config);
+}
+const CHART_FONT = {family:"'Source Sans 3', sans-serif", size:12};
+function renderDashboardCharts(p){
+  if(state.view!=='dashboard') return;
+  if(state.dashTab==='gado'){
+    const vacas = p.lots.filter(l=>l.tipo==='vacas').flatMap(l=>l.animais);
+    const recriaN = p.lots.filter(l=>l.tipo==='recria').reduce((s,l)=>s+l.animais.length,0);
+    const engordaN = p.lots.filter(l=>l.tipo==='engorda').reduce((s,l)=>s+l.animais.length,0);
+    const bezerros = p.lots.filter(l=>l.tipo==='bezerros').reduce((s,l)=>s+l.animais.length,0);
+    makeChart('chart-composicao', {type:'bar', data:{labels:['Vacas','Recria','Engorda','Bezerros'], datasets:[{data:[vacas.length,recriaN,engordaN,bezerros], backgroundColor:['#2F6B29','#8A7B4E','#2B2B28','#7CB342'], borderRadius:6}]}, options:{plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true, ticks:{precision:0, font:CHART_FONT}}, x:{ticks:{font:CHART_FONT}}}}});
+
+    const statusCount = {};
+    STATUS_REPRO.forEach(s=>statusCount[s]=0);
+    vacas.forEach(a=>{ statusCount[a.reproducao.status] = (statusCount[a.reproducao.status]||0)+1; });
+    const entries = Object.entries(statusCount).filter(([,v])=>v>0);
+    makeChart('chart-repro', {type:'doughnut', data:{labels:entries.map(e=>e[0]), datasets:[{data:entries.map(e=>e[1]), backgroundColor:['#2F6B29','#F3DDB0','#DCE8D6','#D8E6E0','#ECE9DD','#F0D6CF','#9B3A2E','#8A7B4E']}]}, options:{plugins:{legend:{position:'bottom', labels:{font:CHART_FONT, boxWidth:12, padding:10}}}}});
+
+    const pesoLote = p.lots.map(l=>{
+      const pesos = l.animais.map(a=>a.pesoAtual).filter(v=>v!=null);
+      return {nome:l.nome, media: pesos.length ? Math.round(pesos.reduce((s,v)=>s+v,0)/pesos.length) : 0};
+    });
+    makeChart('chart-peso-lote', {type:'bar', data:{labels:pesoLote.map(x=>x.nome), datasets:[{data:pesoLote.map(x=>x.media), backgroundColor:'#2F6B29', borderRadius:6}]}, options:{indexAxis:'y', plugins:{legend:{display:false}}, scales:{x:{beginAtZero:true, ticks:{font:CHART_FONT}}, y:{ticks:{font:CHART_FONT}}}}});
+  } else if(state.dashTab==='financeiro'){
+    const engordaLots = p.lots.filter(l=>l.tipo==='engorda');
+    const engordaAnimais = engordaLots.flatMap(l=>l.animais);
+    const comFinanceiro = engordaAnimais.filter(a=>a.manejo.precoVenda || a.manejo.precoCompra);
+    if(comFinanceiro.length===0) return;
+    const sum = arr => arr.reduce((s,v)=>s+(v||0),0);
+    const fins = comFinanceiro.map(calcFinanceiro);
+    const custoTotal = sum(fins.map(f=>f.custoTotal));
+    const receitaTotal = sum(fins.map(f=>f.receita));
+    const lucroTotal = receitaTotal - custoTotal;
+    makeChart('chart-fin-resumo', {type:'bar', data:{labels:['Custo Total','Receita Total','Lucro Total'], datasets:[{data:[custoTotal,receitaTotal,lucroTotal], backgroundColor:['#2B2B28','#2F6B29', lucroTotal>=0?'#7CB342':'#9B3A2E'], borderRadius:6}]}, options:{plugins:{legend:{display:false}}, scales:{y:{ticks:{font:CHART_FONT, callback:v=>'R$ '+v}}, x:{ticks:{font:CHART_FONT}}}}});
+
+    const porLote = engordaLots.map(l=>{
+      const fs = l.animais.filter(a=>a.manejo.precoVenda||a.manejo.precoCompra).map(calcFinanceiro);
+      const lucro = sum(fs.map(f=>(f.receita||0)-(f.custoTotal||0)));
+      return {nome:l.nome, lucro};
+    });
+    makeChart('chart-fin-lote', {type:'bar', data:{labels:porLote.map(x=>x.nome), datasets:[{data:porLote.map(x=>x.lucro), backgroundColor:porLote.map(x=>x.lucro>=0?'#2F6B29':'#9B3A2E'), borderRadius:6}]}, options:{indexAxis:'y', plugins:{legend:{display:false}}, scales:{x:{ticks:{font:CHART_FONT, callback:v=>'R$ '+v}}, y:{ticks:{font:CHART_FONT}}}}});
+  }
 }
 
 function renderLotPicker(p){
